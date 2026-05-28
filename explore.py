@@ -91,10 +91,13 @@ if __name__ == "__main__":
     pp(get(f"/accounts/{account_number}/positions"))
 
     if _ENV == "prod":
-        print("\n=== Quote: AAPL ===")
-        pp(get("/market-data/by-type", symbols="AAPL"))
+        print("\n=== Quote: AAPL,NVDA ===")
+        pp(get("/market-data/by-type", equity="AAPL,NVDA"))
+
+        print("\n=== Metrics: AAPL,NVDA ===")
+        pp(get("/market-metrics", symbols="AAPL,NVDA"))
     else:
-        print("\n(Skipping market data — not available outside prod)")
+        print("\n(Skipping market data and metrics — not available outside prod)")
 
     print("\n=== Option Chain: AAPL ===")
     pp(get("/option-chains/AAPL/nested"))
