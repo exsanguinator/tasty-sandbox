@@ -45,8 +45,16 @@ A Python script for learning and exploring the Tastytrade API.
    ```
 
 5. **Run**
+
+   As a script:
    ```bash
    python explore.py
+   ```
+
+   As a notebook:
+   ```bash
+   pip install jupyter
+   jupyter notebook explore.ipynb
    ```
 
 To deactivate the virtual environment when done: `deactivate`

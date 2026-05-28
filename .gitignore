@@ -2,4 +2,5 @@
 .env
 .session_token
 __pycache__/
+.ipynb_checkpoints/
 *~
