@@ -13,38 +13,38 @@ A Python script for learning and exploring the Tastytrade API.
 
 1. **Create an OAuth application** 
 
-1a. in `cert` on [developer.tastytrade.com](https://developer.tastytrade.com/sandbox/)
-   - Sign-in with your developer credentials
-   - under the section `OAuth2 in Sandbox`, Create an Account
-   - under the section `OAuth2 Application`, Create Grant
-   - save the `Client Secret` and `Refresh Token`
+   - in `cert` on [developer.tastytrade.com](https://developer.tastytrade.com/sandbox/)
+      - Sign-in with your developer credentials
+      - under the section `OAuth2 in Sandbox`, Create an Account
+      - under the section `OAuth2 Application`, Create Grant
+      - save the `Client Secret` and `Refresh Token`
 
-1b. in `prod` on [my.tastytrade.com](https://my.tastytrade.com)
-   - Manage tab > My Profile > API > OAuth Applications > + New OAuth client
-   - Save your `Client Secret` — shown only once
+   - in `prod` on [my.tastytrade.com](https://my.tastytrade.com)
+      - Manage tab > My Profile > API > OAuth Applications > + New OAuth client
+      - Save your `Client Secret` — shown only once
 
-2. **Generate a personal grant**
-   - On the same page, click `"..."` > Create Grant
-   - Save the `Refresh Token` — this never expires
+      - **Generate a personal grant**
+         - On the same page, click `"..."` > Create Grant
+         - Save the `Refresh Token` — this never expires
 
-3. **Create a virtual environment**
+2. **Create a virtual environment**
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
    ```
 
-4. **Install dependencies**
+3. **Install dependencies**
    ```bash
    pip install requests python-dotenv
    ```
 
-5. **Configure credentials**
+4. **Configure credentials**
    ```bash
    cp .env.example .env
    # edit .env with your environment, client secret, and refresh token
    ```
 
-6. **Run**
+5. **Run**
    ```bash
    python explore.py
    ```
