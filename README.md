@@ -46,9 +46,14 @@ A Python script for learning and exploring the Tastytrade API.
 
 5. **Run**
 
-   As a script:
+   Explore API endpoints:
    ```bash
    python explore.py
+   ```
+
+   Export last 7 days of transactions to CSV:
+   ```bash
+   python transactions.py > transactions.csv
    ```
 
    As a notebook:

@@ -2,9 +2,9 @@ import os
 import json
 import time
 import requests
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-load_dotenv()
+load_dotenv(find_dotenv())
 
 _ENV = os.environ.get("TASTY_ENV", "cert")
 BASE_URLS = {

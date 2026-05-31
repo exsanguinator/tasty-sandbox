@@ -15,9 +15,30 @@ Switch environments via env var (defaults to `cert`):
 TASTY_ENV=prod python explore.py
 ```
 
+## Running transactions.py
+
+Fetches all transactions from the last 7 days across all accounts and writes a CSV to stdout:
+
+```bash
+source .venv/bin/activate
+python transactions.py > transactions.csv
+```
+
+```bash
+TASTY_ENV=prod python transactions.py > transactions.csv
+```
+
+Progress and errors go to stderr; only the CSV goes to stdout.
+
 ## Architecture
 
-Single-file script (`explore.py`) that authenticates against the Tastytrade API and exercises key endpoints.
+### explore.py
+
+Single-file script that authenticates against the Tastytrade API and exercises key endpoints.
+
+### transactions.py
+
+Fetches transactions for the last 7 days across all accounts under `GET /customers/me/accounts`, then paginates `GET /accounts/{acct}/transactions` for each. Outputs a CSV with `account_number` as the first column. The `lots` field is serialized as a JSON string if present. Column set is derived dynamically from whatever fields the API returns.
 
 **Auth flow:** OAuth2 using a long-lived refresh token to obtain short-lived access tokens (15 min). `_ensure_token()` is called before every request and auto-refreshes when expired. On a 401 response, the token is force-refreshed and the request retried once. Credentials come from `.env` via `python-dotenv`.
 
