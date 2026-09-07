@@ -73,7 +73,7 @@ A Python script for learning and exploring the Tastytrade API.
    ```
    Reads `account_number` and `watchlists` from `margin-scan-config.json` (or the
    config path given as the first argument), resolves the equity tickers across
-   those watchlists, filters out `.IVR` symbols, symbols with `liquidity-rating < 2`,
+   those watchlists, filters out `.IVR` symbols, symbols with `liquidity-rating < 1`,
    and symbols without weekly options, then for each remaining ticker picks the
    nearest-to-45-DTE monthly expiration's nearest OTM put strike, dry-runs a
    1-lot sell-to-open order via `POST /accounts/{account_number}/orders/dry-run`,
