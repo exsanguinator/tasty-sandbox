@@ -56,6 +56,30 @@ A Python script for learning and exploring the Tastytrade API.
    python transactions.py > transactions.csv
    ```
 
+   Dump all watchlists:
+   ```bash
+   python get-watchlists.py
+   ```
+
+   Dump margin requirements for every account:
+   ```bash
+   python get-margin-req.py
+   ```
+
+   Rank short-put candidates from your watchlists by credit-to-buying-power efficiency
+   (requires `TASTY_ENV=prod` and an OAuth grant with the `trade` scope):
+   ```bash
+   TASTY_ENV=prod python scan-put-bp.py [config-path] [--debug]
+   ```
+   Reads `account_number` and `watchlists` from `margin-scan-config.json` (or the
+   config path given as the first argument), resolves the equity tickers across
+   those watchlists, filters out `.IVR` symbols, symbols with `liquidity-rating < 2`,
+   and symbols without weekly options, then for each remaining ticker picks the
+   nearest-to-45-DTE monthly expiration's nearest OTM put strike, dry-runs a
+   1-lot sell-to-open order via `POST /accounts/{account_number}/orders/dry-run`,
+   and writes a CSV to stdout ranked by `credit / buying_power`. Pass `--debug` to
+   print each ticker's raw `buying-power-effect` and any preflight errors to stderr.
+
    As a notebook:
    ```bash
    pip install jupyter
@@ -69,3 +93,4 @@ To deactivate the virtual environment when done: `deactivate`
 - Access tokens expire after 15 minutes and are refreshed automatically
 - Market data (`/market-data/by-type`) is only available in `prod`
 - Cert credentials and prod credentials are separate — each environment needs its own OAuth app and grant
+- `scan-put-bp.py` places dry-run orders, which requires the OAuth grant's refresh token to include the `trade` scope in addition to `read` — regenerate the grant after adding the scope, since existing refresh tokens aren't upgraded retroactively
