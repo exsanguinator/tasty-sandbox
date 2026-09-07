@@ -44,6 +44,14 @@ A Python script for learning and exploring the Tastytrade API.
    # edit .env with your environment, client secret, and refresh token
    ```
 
+   `scan-put-bp.py` also needs a config file:
+   ```bash
+   cp margin-scan-config.json.example margin-scan-config.json
+   # edit margin-scan-config.json with your account number and watchlist names
+   ```
+   `margin-scan-config.json` is gitignored since it holds your account number
+   and watchlist names — only the `.example` file is checked in.
+
 5. **Run**
 
    Explore API endpoints:
@@ -69,16 +77,21 @@ A Python script for learning and exploring the Tastytrade API.
    Rank short-put candidates from your watchlists by credit-to-buying-power efficiency
    (requires `TASTY_ENV=prod` and an OAuth grant with the `trade` scope):
    ```bash
-   TASTY_ENV=prod python scan-put-bp.py [config-path] [--debug]
+   TASTY_ENV=prod python scan-put-bp.py [config-path] [--csv|--html] [--debug]
    ```
    Reads `account_number` and `watchlists` from `margin-scan-config.json` (or the
    config path given as the first argument), resolves the equity tickers across
-   those watchlists, filters out `.IVR` symbols, symbols with `liquidity-rating < 1`,
+   those watchlists, filters out `.IVR` symbols, symbols with `liquidity-rating < 2`,
    and symbols without weekly options, then for each remaining ticker picks the
    nearest-to-45-DTE monthly expiration's nearest OTM put strike, dry-runs a
    1-lot sell-to-open order via `POST /accounts/{account_number}/orders/dry-run`,
-   and writes a CSV to stdout ranked by `credit / buying_power`. Pass `--debug` to
-   print each ticker's raw `buying-power-effect` and any preflight errors to stderr.
+   and writes the results ranked by `credit to bpr` (credit / marginal buying power).
+   Also reports `strike 52wk pct` (0.0 = strike at the underlying's 52-week low,
+   1.0 = at the 52-week high) and `bpr to notional` (buying power / (strike * 100)).
+   Output is CSV to stdout by default, or `--csv` explicitly; pass `--html` to
+   instead write a standalone HTML page with a click-to-sort results table. Pass
+   `--debug` to print each ticker's raw `buying-power-effect` and any preflight
+   errors to stderr.
 
    As a notebook:
    ```bash
