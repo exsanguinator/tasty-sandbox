@@ -101,28 +101,35 @@ A Python script for learning and exploring the Tastytrade API.
    - `buying_power` — marginal buying-power/margin requirement this specific
      order would add to the account, from the order dry-run's isolated impact
      (`isolated-order-margin-requirement` / `change-in-buying-power`).
-   - `credit to bpr` — `credit / buying_power`. **Capital efficiency under this
-     account's margin rules**: how much premium you collect per dollar of buying
-     power the trade actually consumes. The primary ranking column, since the
-     whole point of this script is to find trades that use your account's
-     margin (a scarce resource) efficiently — it is account- and margin-type
-     -specific (Reg T vs. Portfolio Margin accounts will show very different
-     numbers for the same trade).
-   - `bpr to notional` — `buying_power / (strike * 100)`. What fraction of the
-     trade's full notional (100 shares at the strike) your margin system is
-     actually holding you to. Low values mean the account's margin treatment
-     is very capital-efficient for that position (portfolio margin, existing
-     offsetting positions, etc.); a value near `1.0` means you're being held to
-     roughly cash-secured-put levels.
-   - `credit to notional` — `credit / (strike * 100)`. A **reward** (yield)
-     metric, not a risk or margin metric — the classic "cash-secured put
-     yield": premium collected as a percentage of the capital you'd need if
-     assigned. It's account- and margin-agnostic, so it's useful for comparing
-     tickers on an apples-to-apples basis, but note it's an imperfect, indirect
-     proxy for risk too: since premium scales with implied volatility, a high
-     `credit to notional` often means the market is pricing in more risk for
-     that name, not that you're being overpaid for the risk taken (i.e. it is
-     not a measure of edge).
+   - `credit to bpr` — `credit / buying_power * 100`, as a percentage.
+     **Capital efficiency under this account's margin rules**: how much
+     premium you collect per dollar of buying power the trade actually
+     consumes. The primary ranking column, since the whole point of this
+     script is to find trades that use your account's margin (a scarce
+     resource) efficiently — it is account- and margin-type-specific (Reg T
+     vs. Portfolio Margin accounts will show very different numbers for the
+     same trade).
+   - `bpr to notional` — `buying_power / (strike * 100) * 100`, as a
+     percentage. What fraction of the trade's full notional (100 shares at
+     the strike) your margin system is actually holding you to. Low values
+     mean the account's margin treatment is very capital-efficient for that
+     position (portfolio margin, existing offsetting positions, etc.); a
+     value near `100` means you're being held to roughly cash-secured-put
+     levels.
+   - `credit to notional` — `credit / (strike * 100) * 100`, as a percentage.
+     A **reward** (yield) metric, not a risk or margin metric — the classic
+     "cash-secured put yield": premium collected as a percentage of the
+     capital you'd need if assigned. It's account- and margin-agnostic, so
+     it's useful for comparing tickers on an apples-to-apples basis, but note
+     it's an imperfect, indirect proxy for risk too: since premium scales
+     with implied volatility, a high `credit to notional` often means the
+     market is pricing in more risk for that name, not that you're being
+     overpaid for the risk taken (i.e. it is not a measure of edge).
+   - `ivr` — IV Rank (`implied-volatility-index-rank` from `/market-metrics`),
+     as a percentage. Where the ticker's current implied volatility sits
+     within its 1-year IV range.
+   - `ivx` — 30-day implied volatility (`implied-volatility-index` from
+     `/market-metrics`), as a percentage.
 
    As a notebook:
    ```bash
