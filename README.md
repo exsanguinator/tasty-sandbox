@@ -149,3 +149,11 @@ To deactivate the virtual environment when done: `deactivate`
 - Market data (`/market-data/by-type`) is only available in `prod`
 - Cert credentials and prod credentials are separate — each environment needs its own OAuth app and grant
 - `scan-put-bp.py` places dry-run orders, which requires the OAuth grant's refresh token to include the `trade` scope in addition to `read` — regenerate the grant after adding the scope, since existing refresh tokens aren't upgraded retroactively
+
+## Android app
+
+`mobile/` holds a standalone Expo / React Native port of `scan-put-bp.py` that runs the
+same scan on an Android phone with no backend: a Settings screen for picking the account
+and watchlists, and an on-screen sortable results table. Credentials are baked into the
+build from this repo's `.env`. See [mobile/README.md](mobile/README.md) for the build
+and sideload instructions.

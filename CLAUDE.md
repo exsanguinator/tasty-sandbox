@@ -41,6 +41,24 @@ TASTY_ENV=prod python scan-put-bp.py [config-path] [--csv|--html] [--debug]
 
 Reads `account_number` and `watchlists` from `margin-scan-config.json` (or the config path given as the first argument). Output is CSV to stdout by default; `--html` writes a standalone sortable HTML table instead. See README.md for full column definitions.
 
+## Running the Android app (mobile/)
+
+Standalone Expo / React Native port of `scan-put-bp.py`. Credentials are baked in at
+build time from the repo-root `.env` via `app.config.ts`; requires `TASTY_ENV=prod`.
+
+```bash
+cd mobile
+npm run typecheck
+npm run scan -- <account-number> "<watchlist>" ...   # runs lib/scan.ts under Node
+npx expo run:android --variant release               # needs JDK 17 + Android SDK
+```
+
+`lib/scan.ts` is a straight port of `scan-put-bp.py` (same endpoints, constants and
+order), differing only in that the per-ticker chain fetches and dry-runs run 5 at a
+time, rows keep raw numbers for numeric sorting, and skips are collected rather than
+printed to stderr. Keep the two in sync when changing the scan logic. See
+`mobile/README.md`.
+
 ## Architecture
 
 ### explore.py
