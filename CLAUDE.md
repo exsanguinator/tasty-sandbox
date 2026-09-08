@@ -54,8 +54,9 @@ npx expo run:android --variant release               # needs JDK 17 + Android SD
 ```
 
 `lib/scan.ts` is a straight port of `scan-put-bp.py` (same endpoints, constants and
-order), differing only in that the per-ticker chain fetches and dry-runs run 5 at a
-time, rows keep raw numbers for numeric sorting, and skips are collected rather than
+order), differing only in that it runs the per-ticker chain fetches and dry-runs at a
+fixed 5 at a time (the Python script derives its worker count from `os.cpu_count()`),
+rows keep raw numbers for numeric sorting, and skips are collected rather than
 printed to stderr. Keep the two in sync when changing the scan logic. See
 `mobile/README.md`.
 
@@ -87,5 +88,7 @@ Fetches transactions for the last 7 days across all accounts under `GET /custome
 ### scan-put-bp.py
 
 Resolves equity tickers from configured watchlists, filters out `.IVR` symbols, symbols with `liquidity-rating < 2` (via `/market-metrics`, which also supplies the `ivr`/`ivx` columns), and symbols without weekly options. For each remaining ticker, picks the nearest-to-45-DTE monthly expiration's nearest OTM put strike, dry-runs a 1-lot sell-to-open order via `POST /accounts/{account_number}/orders/dry-run` to get the marginal buying-power impact, and ranks results by `credit to bpr` (see README.md for column definitions). `strike 52wk pct`, `credit`, `buying_power`, `credit to bpr`, `bpr to notional`, `credit to notional`, `ivr`, and `ivx` are all output as zero-padded numbers with 1 decimal place (e.g. `"1.0"`), with the percentage-scale columns already multiplied by 100 (not raw fractions).
+
+Both per-ticker loops — the `/option-chains/{ticker}/nested` fetches in `find_candidates()` and the dry-runs — run on a `ThreadPoolExecutor` with `CONCURRENCY = min(os.cpu_count() or 4, 16)` workers. These are network-bound, so the cap exists to stay under the API's rate limit rather than to match the CPU. Workers return their stderr messages instead of printing, and the main thread prints them in ticker order, so output stays identical to the serial version. Token refresh is guarded by `_token_lock` (with `_refresh_token_if_stale()` collapsing a simultaneous 401 storm into a single refresh).
 
 Same auth flow, env vars, and API conventions as above. Unlike `explore.py`, this script hard-requires `TASTY_ENV=prod` and exits early otherwise, since it depends on `/market-data/by-type` for underlying/option prices.
