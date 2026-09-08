@@ -94,12 +94,16 @@ A Python script for learning and exploring the Tastytrade API.
    **Column definitions:** `strike 52wk pct`, `credit`, `buying_power`,
    `credit to bpr`, `bpr to notional`, `credit to notional`, `ivr`, and `ivx`
    are all formatted as zero-padded numbers with 1 decimal place (e.g.
-   `"1.0"`, not `"1"`).
+   `"1.0"`, not `"1"`); `chg%` uses 2 decimal places (e.g. `"-1.25"`).
    - `strike 52wk pct` — where the strike sits in the underlying's 52-week range,
      as a percentage: `(strike - 52wk_low) / (52wk_high - 52wk_low) * 100`.
      `0` = strike at the 52-week low, `100` = at the 52-week high. Can fall
      slightly outside `[0, 100]` if the strike is beyond the current 52-week
      range.
+   - `chg%` — how far the underlying's current mid has moved from the previous
+     day's close, as a percentage: `(underlying_mid - prev_close) / prev_close
+     * 100`, using `prev-close` from `/market-data/by-type`. Negative when the
+     underlying is down on the day.
    - `credit` — estimated premium received for selling 1 contract, in dollars
      (`option mid price * 100`).
    - `buying_power` — marginal buying-power/margin requirement this specific
