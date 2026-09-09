@@ -35,7 +35,7 @@ A Python script for learning and exploring the Tastytrade API.
 
 3. **Install dependencies**
    ```bash
-   pip install requests python-dotenv
+   pip install requests python-dotenv scipy
    ```
 
 4. **Configure credentials**
@@ -92,8 +92,8 @@ A Python script for learning and exploring the Tastytrade API.
    errors to stderr.
 
    **Column definitions:** `strike 52wk pct`, `credit`, `buying_power`,
-   `credit to bpr`, `bpr to notional`, `credit to notional`, `ivr`, and `ivx`
-   are all formatted as zero-padded numbers with 1 decimal place (e.g.
+   `credit to bpr`, `bpr to notional`, `credit to notional`, `ivr`, `ivx`, and
+   `skew` are all formatted as zero-padded numbers with 1 decimal place (e.g.
    `"1.0"`, not `"1"`); `chg%` uses 2 decimal places (e.g. `"-1.25"`).
    - `strike 52wk pct` — where the strike sits in the underlying's 52-week range,
      as a percentage: `(strike - 52wk_low) / (52wk_high - 52wk_low) * 100`.
@@ -138,6 +138,44 @@ A Python script for learning and exploring the Tastytrade API.
      within its 1-year IV range.
    - `ivx` — 30-day implied volatility (`implied-volatility-index` from
      `/market-metrics`), as a percentage.
+   - `skew` — 25-delta volatility skew for the same expiration the row's
+     strike comes from: `(IV_25d_call - IV_25d_put) / (IV_25d_call +
+     IV_25d_put) * 100`, so it runs from `-100` (extreme put skew) to `+100`
+     (extreme call skew), and `0` means calls and puts at 25 delta price the
+     same volatility. Negative is the usual reading for index and large-cap
+     names: the market is paying up for downside protection, which is what you
+     are selling. Positive is less common and tends to show up in commodity
+     proxies and names with squeeze or takeover dynamics. Because the ratio is
+     normalised by the level of volatility, it is comparable across tickers of
+     very different `ivx`, and unlike `ivr` and `ivx` it describes the *shape*
+     of the smile rather than its height.
+
+     The API exposes no per-strike implied volatility or delta, so this is
+     computed locally. Strikes on each side are seeded from that expiration's
+     `implied-volatility` (`/market-metrics`), quoted through
+     `/market-data/by-type`, inverted to an implied volatility with a
+     Black-Scholes root find, and interpolated to exactly 25 delta. The
+     interpolation works in `d1` rather than in delta directly, since implied
+     volatility is close to linear in `d1` across the window but steeply
+     nonlinear against delta out in the wings. The risk-free rate comes from
+     `/margin-requirements-public-configuration`.
+
+     Three caveats. The model is European while US equity options are
+     American: out-of-the-money calls are unaffected, since early exercise is
+     never optimal without a dividend, but out-of-the-money puts carry an
+     early-exercise premium that Black-Scholes attributes to volatility,
+     overstating put implied volatility by a few tenths of a vol point and
+     biasing `skew` slightly negative. Dividends are ignored entirely and the
+     forward is approximated by spot, because the API gives a dividend amount
+     and frequency but no ex-dates, and annualizing a quarterly payment across
+     a 45-day window assumes a dividend most windows do not contain; measured
+     on production quotes, doing so moved `skew` by up to 6.5 points on a
+     6%-yield name and pushed the highest-yielding names to the top of the
+     call-skew ranking, which is not a real effect. Finally the inputs are mid
+     prices, so a name whose 25-delta strikes are quoted too wide, too thin or
+     too far from 25 delta is left blank rather than guessed at, with the
+     reason on stderr. Treat `skew` as a comparative screening number across
+     tickers, not as an absolute value or a substitute for a broker greek.
 
    As a notebook:
    ```bash
