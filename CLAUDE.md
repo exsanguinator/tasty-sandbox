@@ -49,7 +49,7 @@ build time from the repo-root `.env` via `app.config.ts`; requires `TASTY_ENV=pr
 ```bash
 cd mobile
 npm run typecheck
-npm run scan -- <account-number> "<watchlist>" ...   # runs lib/scan.ts under Node
+npm run scan -- [--bpr-isolated|--bpr-impact] <account-number> "<watchlist>" ...   # runs lib/scan.ts under Node
 npx expo run:android --variant release               # needs JDK 17 + Android SDK
 ```
 
@@ -57,8 +57,9 @@ npx expo run:android --variant release               # needs JDK 17 + Android SD
 order), differing only in that it runs the per-ticker chain fetches and dry-runs at a
 fixed 5 at a time (the Python script derives its worker count from `os.cpu_count()`),
 it fetches the option quotes and the contemporaneous spot re-fetch as one parallel
-phase rather than two, rows keep raw numbers for numeric sorting, and skips are
-collected rather than printed to stderr. `lib/skew.ts` ports the `skew` column and
+phase rather than two, rows keep raw numbers for numeric sorting, skips are
+collected rather than printed to stderr, and the BPR mode is a Settings radio
+(`isolated` default / `impact`) rather than a `--bpr-*` flag. `lib/skew.ts` ports the `skew` column and
 `lib/blackscholes.ts` replaces scipy (`scipy.stats.norm` and `brentq`) with local
 implementations; the two agree with the Python output to the printed decimal on a
 full production watchlist. Keep all of these in sync when changing the scan logic.
