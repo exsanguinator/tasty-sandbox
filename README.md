@@ -77,7 +77,7 @@ A Python script for learning and exploring the Tastytrade API.
    Rank short-put candidates from your watchlists by credit-to-buying-power efficiency
    (requires `TASTY_ENV=prod` and an OAuth grant with the `trade` scope):
    ```bash
-   TASTY_ENV=prod python scan-put-bp.py [config-path] [--csv|--html] [--debug]
+   TASTY_ENV=prod python scan-put-bp.py [config-path] [--csv|--html] [--bpr-isolated|--bpr-impact] [--debug]
    ```
    Reads `account_number` and `watchlists` from `margin-scan-config.json` (or the
    config path given as the first argument), resolves the equity tickers across
@@ -89,7 +89,26 @@ A Python script for learning and exploring the Tastytrade API.
    Output is CSV to stdout by default, or `--csv` explicitly; pass `--html` to
    instead write a standalone HTML page with a click-to-sort results table. Pass
    `--debug` to print each ticker's raw `buying-power-effect` and any preflight
-   errors to stderr.
+   errors to stderr. Pass `-h`/`--help` for a summary of all arguments and their
+   defaults; it works without `TASTY_ENV=prod` and makes no API calls. Unknown or
+   conflicting arguments (e.g. `--csv --html`) exit with an error before the scan
+   starts.
+
+   Which dry-run figure becomes the `buying_power` column is chosen with one of:
+   - `--bpr-isolated` (default) — `isolated-order-margin-requirement`: the margin
+     this order requires on its own, regardless of the account's existing
+     positions. The premium received doesn't reduce it, so `credit to bpr`
+     compares premium against margin.
+   - `--bpr-impact` — `change-in-buying-power`: how much the account's buying
+     power actually drops (`current-buying-power − new-buying-power`). This
+     reflects existing positions and is roughly
+     `margin change − credit received + fees`. Because the credit is already
+     subtracted in the denominator, `credit to bpr` comes out higher than in
+     isolated mode, most of all for high-premium names. When a ticker's
+     credit covers its whole margin change, buying power doesn't drop, so
+     `buying_power` is `<= 0` (see `buying_power` below).
+
+   Passing both flags is an error.
 
    **Column definitions:** `strike 52wk pct`, `credit`, `buying_power`,
    `credit to bpr`, `bpr to notional`, `credit to notional`, `ivr`, `ivx`, and
@@ -106,9 +125,19 @@ A Python script for learning and exploring the Tastytrade API.
      underlying is down on the day.
    - `credit` — estimated premium received for selling 1 contract, in dollars
      (`option mid price * 100`).
-   - `buying_power` — marginal buying-power/margin requirement this specific
-     order would add to the account, from the order dry-run's isolated impact
-     (`isolated-order-margin-requirement` / `change-in-buying-power`).
+   - `buying_power` — the buying power this 1-lot order consumes, from the
+     order dry-run: `isolated-order-margin-requirement` by default, or
+     `change-in-buying-power` with `--bpr-impact` (see above). Every ticker
+     appears in the output, even when its buying power can't be ranked:
+     - If the dry-run fails or lacks that field, `buying_power`,
+       `credit to bpr`, and `bpr to notional` are all blank.
+     - If the amount is `<= 0`, `buying_power` shows it (colored red in the
+       HTML table) and `credit to bpr` and `bpr to notional` are blank. That
+       includes orders the dry-run marks as freeing buying power
+       (`-effect: Credit`), which show as negative.
+
+     Both kinds of row sort after the ranked rows in CSV output, in ticker
+     order.
    - `credit to bpr` — `credit / buying_power * 100`, as a percentage.
      **Capital efficiency under this account's margin rules**: how much
      premium you collect per dollar of buying power the trade actually

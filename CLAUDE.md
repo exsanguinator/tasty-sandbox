@@ -36,10 +36,10 @@ Ranks short-put candidates from configured watchlists by credit-to-buying-power 
 
 ```bash
 source .venv/bin/activate
-TASTY_ENV=prod python scan-put-bp.py [config-path] [--csv|--html] [--debug]
+TASTY_ENV=prod python scan-put-bp.py [config-path] [--csv|--html] [--bpr-isolated|--bpr-impact] [--debug]
 ```
 
-Reads `account_number` and `watchlists` from `margin-scan-config.json` (or the config path given as the first argument). Output is CSV to stdout by default; `--html` writes a standalone sortable HTML table instead. See README.md for full column definitions.
+Reads `account_number` and `watchlists` from `margin-scan-config.json` (or the config path given as the first argument). Output is CSV to stdout by default; `--html` writes a standalone sortable HTML table instead. `--bpr-isolated` (default) takes the `buying_power` column from the dry-run's `isolated-order-margin-requirement`; `--bpr-impact` takes it from `change-in-buying-power` instead, which already nets out the credit received. See README.md for full column definitions.
 
 ## Running the Android app (mobile/)
 
